@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./Server
+    ports:
+      - "5500:5500"
+    volumes:
+      - ./Server:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=production
+    networks:
+      - specialmap_network
+
+  frontend:
+    build: ./Client
+    ports:
+      - "3500:8880"
+    depends_on:
+      - backend
+    networks:
+      - specialmap_network
+
+networks:
+  specialmap_network:
+
+volumes:
+  db-data:

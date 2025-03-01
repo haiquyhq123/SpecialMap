@@ -1,66 +1,113 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
-const qs = require('qs');
 const pool = require('../services/mysql'); // MySQL connection pool
 
-// Function to fetch and parse Daily Incidents
-async function getDailyIncidents(pageNumber = 1) {
-  const url = 'https://www.wrps.on.ca/Modules/NewsIncidents/search.aspx?feedId=73a5e2dc-45fb-425f-96b9-d575355f7d4d';
+async function fetchAllIncidents() {
+  const baseUrl = 'https://www.wrps.on.ca/Modules/NewsIncidents/search.aspx?feedId=73a5e2dc-45fb-425f-96b9-d575355f7d4d';
 
-  if (pageNumber === 1) {
-    // For page 1, perform a simple GET request
+  try {
+    // Fetch the first page to get totalIncidents count
+    const response = await axios.get(baseUrl);
+    const html = response.data;
+    const $ = cheerio.load(html);
+
+    // Extract total incidents from hidden input field
+    const totalIncidents = parseInt($('#cphContent_hdnTotal').val(), 10) || 0;
+    
+    if (totalIncidents === 0) {
+      console.log("No incidents found.");
+      return [];
+    }
+
+    // Calculate total pages (5 incidents per page)
+    const totalPages = Math.ceil(totalIncidents / 5);
+    console.log(`Total Incidents: ${totalIncidents}, Total Pages: ${totalPages}`);
+
+    let allIncidents = [];
+
+    // Loop through all pages and collect incident data
+    for (let page = 1; page <= totalPages; page++) {
+      console.log(`Fetching data from page ${page}...`);
+      const incidents = await fetchAndStoreIncidents(page);
+      allIncidents = allIncidents.concat(incidents);
+    }
+
+    console.log(`Total incidents collected: ${allIncidents.length}`);
+    return allIncidents;
+
+  } catch (error) {
+    console.error("Error fetching total incidents:", error.message);
+    return [];
+  }
+}
+
+/**
+ * Fetches incident data from a specific page (using GET request-based pagination)
+ */
+async function getDailyIncidents(pageNumber) {
+  //  Append the page number to the URL for pagination
+  const url = `https://www.wrps.on.ca/Modules/NewsIncidents/search.aspx?feedId=73a5e2dc-45fb-425f-96b9-d575355f7d4d&page=${pageNumber}`;
+
+  try {
     const response = await axios.get(url);
     const html = response.data;
     const $ = cheerio.load(html);
+
+    const totalIncidents = $('#cphContent_hdnTotal').val();
+
     return parseNewsItems($);
-  } else {
-    // For pages > 1, perform GET to obtain hidden fields and then POST to simulate paging
-    const response = await axios.get(url);
-    const html = response.data;
-    const $ = cheerio.load(html);
-    
-    // Extract required ASP.NET hidden fields for postback
-    const viewState = $('#__VIEWSTATE').attr('value');
-    const viewStateGenerator = $('#__VIEWSTATEGENERATOR').attr('value');
-    const eventValidation = $('#__EVENTVALIDATION').attr('value');
-    
-    // Prepare form data with the updated page number
-    const formData = {
-      '__VIEWSTATE': viewState,
-      '__VIEWSTATEGENERATOR': viewStateGenerator,
-      '__EVENTVALIDATION': eventValidation,
-      'ctl00$cphContent$hdnPage': pageNumber.toString()
-    };
-
-    // Now send a POST request with the hidden fields
-    const postResponse = await axios.post(url, qs.stringify(formData), {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    });
-
-    const postHtml = postResponse.data;
-    const $$ = cheerio.load(postHtml);
-
-    // Parse the items from the POST response
-    return parseNewsItems($$);
+  } catch (error) {
+    console.error(` Error fetching data from page ${pageNumber}:`, error.message);
+    return [];
   }
 }
 
 
-// Helper function to parse news items from the loaded HTML using Cheerio
+/**
+ * Retrieves the total number of pages available for incidents
+ */
+async function getTotalPages() {
+  try {
+    console.log(" Detecting the total number of pages...");
+
+    const url = 'https://www.wrps.on.ca/Modules/NewsIncidents/search.aspx?feedId=73a5e2dc-45fb-425f-96b9-d575355f7d4d';
+    const response = await axios.get(url);
+    const html = response.data;
+    const $ = cheerio.load(html);
+
+    let totalPages = 1; // Default value
+
+    //  Detect the maximum number of pages from pagination links
+    const paginationLinks = $('a.pageNumber');
+    paginationLinks.each((i, el) => {
+      const pageNum = parseInt($(el).text().trim(), 10);
+      if (!isNaN(pageNum) && pageNum > totalPages) {
+        totalPages = pageNum;
+      }
+    });
+
+    console.log(` Total pages detected: ${totalPages}`);
+    return totalPages;
+  } catch (error) {
+    console.error(' Error detecting total pages:', error.message);
+    return 1; // Default to 1 if an error occurs
+  }
+}
+
+/**
+ * Parses incident data from the provided Cheerio-loaded HTML
+ */
 function parseNewsItems($) {
   const newsItems = [];
   const newsContainer = $('div.newsContainer');
 
   if (newsContainer.length > 0) {
-    // Iterate over each news item
     newsContainer.find('div.newsItem').each((i, elem) => {
       const title = $(elem).find('h2').text().trim() || 'No Title';
       const postedDate = $(elem).find('span.newsItem_PostedDate').text().trim() || 'No Posted Date';
       const description = $(elem).find('span[id*="lblDescription"]').text().trim() || 'No Description';
 
-      // Parse description to extract incidentNumber, incidentDate, location
+      //  Extract incident details (number, date, location)
       const { incidentNumber, incidentDate, location } = parseDescription(description);
 
       newsItems.push({
@@ -73,26 +120,22 @@ function parseNewsItems($) {
       });
     });
   } else {
-    console.log('Could not find the Daily Incidents section.');
+    console.log(' Could not find the Daily Incidents section.');
   }
   return newsItems;
 }
 
 /**
- * This function extracts 'incidentNumber', 'incidentDate', and 'location' from the raw description
- * using a simple regular expression approach. Adjust the regex if the format changes.
+ * Extracts incident number, date, and location from the incident description
  */
 function parseDescription(rawDesc) {
-  // Default values
   let incidentNumber = '';
   let incidentDate = '';
   let location = '';
 
-  // Regex pattern (adapt if the actual format is different)
-  // Example format: "Incident #: WA25053113  Incident Date: Mar 1, 2025 5:47:04 AM  Location: WESTMOUNT RD E, KITCHENER, ON"
   const pattern = /Incident #:\s*(.*?)\s*Incident Date:\s*(.*?)\s*Location:\s*(.*)/s;
-
   const match = rawDesc.match(pattern);
+
   if (match) {
     incidentNumber = match[1].trim();
     incidentDate = match[2].trim();
@@ -103,20 +146,17 @@ function parseDescription(rawDesc) {
 }
 
 /**
- * Retrieves incidents for the given pageNumber, then inserts them into MySQL using shared connection pool.
+ * Fetches incident data from a specific page and inserts it into MySQL
  */
 async function fetchAndStoreIncidents(pageNumber) {
   try {
-    // 1) Fetch daily incidents from the website
     const incidents = await getDailyIncidents(pageNumber);
-    
-    // 2) Check if there are any incidents before inserting
+
     if (incidents.length === 0) {
-      console.log(`Page ${pageNumber}: No data found.`);
+      console.log(` Page ${pageNumber}: No data found.`);
       return;
     }
 
-    // 3) Insert each incident into MySQL
     for (const item of incidents) {
       const insertQuery = `
         INSERT INTO news_items
@@ -130,54 +170,90 @@ async function fetchAndStoreIncidents(pageNumber) {
         item.incidentNumber,
         item.incidentDate,
         item.location
-        // item.description
       ]);
     }
 
-    console.log(`Page ${pageNumber}: ${incidents.length} records inserted.`);
+    console.log(` Page ${pageNumber}: ${incidents.length} records inserted.`);
   } catch (error) {
-    console.error('Error inserting data into MySQL:', error.message);
+    console.error(` Error inserting data from page ${pageNumber}:`, error.message);
   }
 }
 
 /**
- * GET /api/incidents
- * Retrieves all incidents from the database and returns them as JSON.
+ * Fetches all pages dynamically and stores data in MySQL
  */
-async function getIncidents () {
+async function fetchAllPages() {
   try {
-    // Query to fetch all records from 'news_items' table
-    const [rows] = await pool.query('SELECT * FROM news_items ORDER BY incident_date DESC');
+    const totalPages = await getTotalPages(); // Retrieve total number of pages
 
-    return rows;
+    for (let page = 1; page <= totalPages; page++) {
+      console.log(` Fetching data from page ${page}...`);
+      await fetchAndStoreIncidents(page);
+    }
+
+    console.log(' Successfully processed all pages.');
   } catch (error) {
-    console.error('Error fetching data:', error.message);
+    console.error(' Error fetching all pages:', error.message);
   }
-};
+}
 
 /**
- * GET /api/incidents/:id
- * Retrieves a single incident by its ID.
+ * Retrieves all incidents from the database
  */
-async function getIncidentsById (id) {
+async function getIncidents() {
   try {
-    // const { id } = req.params;
+    const [rows] = await pool.query('SELECT title, posted_date, incident_number, incident_date, location, created_at FROM news_items ORDER BY incident_date DESC');
+    return rows;
+  } catch (error) {
+    console.error(' Error fetching data:', error.message);
+  }
+}
+
+/**
+ * Retrieves a single incident by its ID
+ */
+async function getIncidentsById(id) {
+  try {
     const [rows] = await pool.query('SELECT * FROM news_items WHERE id = ?', [id]);
 
     if (rows.length === 0) {
-      // return res.status(404).json({ status: 'error', message: 'Incident not found' });
-      console.log(`ID ${id}: No data found.`);
+      console.log(` ID ${id}: No data found.`);
     }
 
     return rows;
   } catch (error) {
-    console.error('Error fetching single incident:', error.message);
+    console.error(' Error fetching single incident:', error.message);
   }
-};
+}
 
-// Export the function for use in other modules
+async function uploadIncident(req) {
+  try {
+    const incident = req.body;
+
+    const insertQuery = `
+      INSERT INTO news_items
+        (title, posted_date, incident_number, incident_date, location)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+
+    await pool.query(insertQuery, [
+      req.body.title,
+      req.body.posted_date,
+      req.body.incident_number,
+      req.body.incident_date,
+      req.body.location
+    ]);
+  } catch (error) {
+    console.error(` Error inserting data from page ${pageNumber}:`, error.message);
+  }
+}
+
+//  Export functions for use in other modules
 module.exports = {
+  fetchAllIncidents,
   fetchAndStoreIncidents,
+  fetchAllPages,
   getIncidents,
   getIncidentsById,
+  uploadIncident,
 };
