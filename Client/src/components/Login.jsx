@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Navigate } from "react-router-dom";
 
-
 function Login() {
     const [redirect, setRedirect] = useState(false);
     const {
@@ -11,17 +10,29 @@ function Login() {
         formState: { errors }
     } = useForm();
 
-    const onSubmit = (data) => {
-        const userData = JSON.parse(localStorage.getItem(data.email));
-        if (userData) { // getItem can return actual value or null
-            if (userData.password === data.password) {
+    const onSubmit = async (data) => {
+        try {
+            const response = await fetch(`http://10.144.112.60:3000/api/user?email=${data.email}&password=${data.password}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const userData = await response.json();
+            if (userData && userData.password === data.password) {
                 console.log('Login successful');
                 setRedirect(true);
             } else {
                 console.log('Invalid email or password');
             }
-        } else {
-            console.log('Invalid email or password');
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+            // Fallback to local storage verification
+            const localUserData = JSON.parse(localStorage.getItem(data.email));
+            if (localUserData && localUserData.password === data.password) {
+                console.log('Login successful (local storage)');
+                setRedirect(true);
+            } else {
+                console.log('Invalid email or password');
+            }
         }
     };
 
@@ -39,7 +50,7 @@ function Login() {
                 <label>Password:</label>
                 <input type="password" {...register("password", { required: true })} />
                 {errors.password && <span style={{ color: "red" }}>*Password* is mandatory</span>}
-                <input type={"submit"} style={{ backgroundColor: "#a1eafb" }} />
+                <input type="submit" style={{ backgroundColor: "#a1eafb" }} />
             </form>
             <a href="./register">Not have account yet?</a>
         </div>
