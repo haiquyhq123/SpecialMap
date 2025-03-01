@@ -1,47 +1,52 @@
-import React, { useState } from 'react';
-import './Register.css';
+import React from "react";
+import { useForm } from "react-hook-form";
 
-function Register({ onRegister, onBackToLogin }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+function Register() {
+    const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (password === confirmPassword) {
-      onRegister({ username, password });
-    } else {
-      alert("Passwords do not match");
-    }
-  };
+    const onSubmit = (data) => {
+        if (data.password !== data.retypePassword) {
+            console.log("Passwords do not match");
+            return;
+        }
+        localStorage.setItem(data.email, JSON.stringify({ 
+            name: data.name, 
+            phone: data.phone, 
+            password: data.password 
+        }));
+        console.log(JSON.parse(localStorage.getItem(data.email)));
+    };
 
-  return (
-    <div className="register-container">
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Username"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-        />
-        <input
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm Password"
-        />
-        <button type="submit">Register</button>
-      </form>
-      <button className="back-to-login-button" onClick={onBackToLogin}>Back to Login</button>
-    </div>
-  );
+    return (
+        <div className="Register-Form">
+            <p className="title">Registration Form</p>
+
+            <form className="Register-Form" onSubmit={handleSubmit(onSubmit)}>
+                <label>Name:</label>
+                <input type="text" {...register("name", { required: true })} />
+                {errors.name && <span style={{ color: "red" }}>*Name* is mandatory</span>}
+
+                <label>Email:</label>
+                <input type="email" {...register("email", { required: true })} />
+                {errors.email && <span style={{ color: "red" }}>*Email* is mandatory</span>}
+
+                <label>Phone:</label>
+                <input type="tel" {...register("phone", { required: true })} />
+                {errors.phone && <span style={{ color: "red" }}>*Phone* is mandatory</span>}
+
+                <label>Password:</label>
+                <input type="password" {...register("password", { required: true })} />
+                {errors.password && <span style={{ color: "red" }}>*Password* is mandatory</span>}
+
+                <label>Retype Password:</label>
+                <input type="password" {...register("retypePassword", { required: true })} />
+                {errors.retypePassword && <span style={{ color: "red" }}>*Retype Password* is mandatory</span>}
+
+                <input type="submit" style={{ backgroundColor: "#a1eafb" }} />
+            </form>
+            <a href="/">Back To Log In</a>
+        </div>
+    );
 }
 
 export default Register;
