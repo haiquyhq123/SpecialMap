@@ -47,6 +47,7 @@ async function getDailyIncidents(pageNumber = 1) {
   }
 }
 
+
 // Helper function to parse news items from the loaded HTML using Cheerio
 function parseNewsItems($) {
   const newsItems = [];
@@ -139,7 +140,44 @@ async function fetchAndStoreIncidents(pageNumber) {
   }
 }
 
+/**
+ * GET /api/incidents
+ * Retrieves all incidents from the database and returns them as JSON.
+ */
+async function getIncidents () {
+  try {
+    // Query to fetch all records from 'news_items' table
+    const [rows] = await pool.query('SELECT * FROM news_items ORDER BY incident_date DESC');
+
+    return rows;
+  } catch (error) {
+    console.error('Error fetching data:', error.message);
+  }
+};
+
+/**
+ * GET /api/incidents/:id
+ * Retrieves a single incident by its ID.
+ */
+async function getIncidentsById (id) {
+  try {
+    // const { id } = req.params;
+    const [rows] = await pool.query('SELECT * FROM news_items WHERE id = ?', [id]);
+
+    if (rows.length === 0) {
+      // return res.status(404).json({ status: 'error', message: 'Incident not found' });
+      console.log(`ID ${id}: No data found.`);
+    }
+
+    return rows;
+  } catch (error) {
+    console.error('Error fetching single incident:', error.message);
+  }
+};
+
 // Export the function for use in other modules
 module.exports = {
-  fetchAndStoreIncidents
+  fetchAndStoreIncidents,
+  getIncidents,
+  getIncidentsById,
 };
