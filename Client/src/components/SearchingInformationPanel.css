@@ -1,0 +1,20 @@
+.search-panel {
+    margin: 20px;
+  }
+  
+  .search-panel form {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .search-panel input {
+    padding: 10px;
+    font-size: 16px;
+    margin-right: 10px;
+  }
+  
+  .search-panel button {
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
