@@ -33,9 +33,20 @@ async function getIncidentsById(req, res) {
   }
 };
 
+async function uploadIncident(req, res) {
+  try {
+    await policeNewsService.uploadIncident(req);
+    res.json({"success": "success"});
+  } catch (error) {
+    res.status(500).json({ error: 'Error occurred while fetching Daily Incidents data' });
+  }
+  console.log("success");
+};
+
 // Export the function for use in other modules
 module.exports = {
   fetchAllPages,
   getIncidents,
   getIncidentsById,
+  uploadIncident,
 };

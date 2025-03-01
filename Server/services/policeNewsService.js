@@ -226,6 +226,28 @@ async function getIncidentsById(id) {
   }
 }
 
+async function uploadIncident(req) {
+  try {
+    const incident = req.body;
+
+    const insertQuery = `
+      INSERT INTO news_items
+        (title, posted_date, incident_number, incident_date, location)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+
+    await pool.query(insertQuery, [
+      req.body.title,
+      req.body.posted_date,
+      req.body.incident_number,
+      req.body.incident_date,
+      req.body.location
+    ]);
+  } catch (error) {
+    console.error(` Error inserting data from page ${pageNumber}:`, error.message);
+  }
+}
+
 //  Export functions for use in other modules
 module.exports = {
   fetchAllIncidents,
@@ -233,4 +255,5 @@ module.exports = {
   fetchAllPages,
   getIncidents,
   getIncidentsById,
+  uploadIncident,
 };
