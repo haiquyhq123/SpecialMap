@@ -17,25 +17,7 @@ function OpenMap({ location }) {
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
 
-  useEffect(() => {
-    if (location) {
-      const locations = {
-        waterloo: [43.4643, -80.5204],
-        toronto: [43.65107, -79.347015],
-        ottawa: [45.4215, -75.6972],
-        vancouver: [49.2827, -123.1207]
-      };
-
-      const lowerCaseLocation = location.toLowerCase();
-      if (locations[lowerCaseLocation]) {
-        setCoordinates(locations[lowerCaseLocation]);
-      } else {
-        console.log("Location not found");
-      }
-    }
-  }, [location]);
-
-  // 🔹 Fetch data from API (localhost:3000/api/arcgis)
+  // 🔹 Fetch data from API 
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -71,7 +53,7 @@ function OpenMap({ location }) {
         {/* 📍 Default Location Marker */}
         <Marker position={coordinates}>
           <Popup>
-            {location.charAt(0).toUpperCase() + location.slice(1)}. <br /> A beautiful place.
+            {location.charAt(0).toUpperCase() + location.slice(1)}. <br /> This is Waterloo,
           </Popup>
         </Marker>
 

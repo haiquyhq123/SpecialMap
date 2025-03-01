@@ -68,7 +68,7 @@ function FormSendReport() {
           />
         </label>
         <label>
-          Incident Number:
+          Incident Description
           <input
             type="text"
             value={incidentDescription}
