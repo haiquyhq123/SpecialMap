@@ -2,6 +2,8 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const pool = require('../services/mysql'); // MySQL connection pool
 
+const api_key = 'ge-20f850ce081d1822';
+
 async function fetchAllIncidents() {
   const baseUrl = 'https://www.wrps.on.ca/Modules/NewsIncidents/search.aspx?feedId=73a5e2dc-45fb-425f-96b9-d575355f7d4d';
 
@@ -158,10 +160,14 @@ async function fetchAndStoreIncidents(pageNumber) {
     }
 
     for (const item of incidents) {
+      await sleep(150);
+      // Get coordinates from the location
+      const { latitude, longitude } = await getCoordinates(item.location);
+
       const insertQuery = `
         INSERT INTO news_items
-          (title, posted_date, incident_number, incident_date, location, receivedFrom)
-        VALUES (?, ?, ?, ?, ?, ?)
+          (title, posted_date, incident_number, incident_date, location, latitude, longitude, receivedFrom)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       await pool.query(insertQuery, [
@@ -170,6 +176,8 @@ async function fetchAndStoreIncidents(pageNumber) {
         item.incidentNumber,
         item.incidentDate,
         item.location,
+        latitude,
+        longitude,
         0
       ]);
     }
@@ -203,7 +211,7 @@ async function fetchAllPages() {
  */
 async function getIncidents() {
   try {
-    const [rows] = await pool.query('SELECT title, posted_date, incident_number, incident_date, location, created_at FROM news_items ORDER BY incident_date DESC');
+    const [rows] = await pool.query('SELECT title, posted_date, incident_number, incident_date, location, latitude, longitude, created_at FROM news_items ORDER BY incident_date DESC');
     return rows;
   } catch (error) {
     console.error(' Error fetching data:', error.message);
@@ -250,6 +258,35 @@ async function uploadIncident(req) {
   }
 }
 
+async function getCoordinates(address) {
+  try {
+let convertAddress = address.split(',')[0];
+const query = 'https://api.geocode.earth/v1/search?' +
+`api_key=${api_key}&` +
+`text=${convertAddress}`.replace(' ', '+');
+    // const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+    const response = await axios.get(query);
+    
+    if (response.data.features.length > 0) {
+      return {
+        longitude: parseFloat(response.data.features[0].geometry.coordinates[0]),
+        latitude: parseFloat(response.data.features[0].geometry.coordinates[1]),
+      };
+    } else {
+      console.warn(`Coordinates not found for: ${address}`);
+      return { latitude: null, longitude: null };
+    }
+  } catch (error) {
+    console.error("Error fetching coordinates:", error.message);
+    return { latitude: null, longitude: null };
+  }
+}
+
+async function sleep(millis) {
+  return new Promise(resolve => setTimeout(resolve, millis));
+}
+
+
 //  Export functions for use in other modules
 module.exports = {
   fetchAllIncidents,
@@ -258,4 +295,5 @@ module.exports = {
   getIncidents,
   getIncidentsById,
   uploadIncident,
+  getCoordinates,
 };

@@ -49,7 +49,7 @@ async function getSavedData() {
 
     const features = rows.map(row =>row.feature);
 
-    console.log("Raw feature data:", rows[0]?.feature);
+    // console.log("Raw feature data:", rows[0]?.feature);
 
     return {
       status: 'success',
