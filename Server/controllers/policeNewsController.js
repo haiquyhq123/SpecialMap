@@ -1,9 +1,9 @@
 const policeNewsService = require('../services/policeNewsService');
 
-async function fetchAndStoreIncidents(req, res) {
+async function fetchAllPages(req, res) {
   try {
     const page = parseInt(req.query.page) || 1;
-    const newsItems = await policeNewsService.fetchAndStoreIncidents(page);
+    const newsItems = await policeNewsService.fetchAllIncidents(page);
     res.json({ dailyIncidents: newsItems });
   } catch (error) {
     res.status(500).json({ error: 'Error occurred while fetching Daily Incidents data' });
@@ -35,7 +35,7 @@ async function getIncidentsById(req, res) {
 
 // Export the function for use in other modules
 module.exports = {
-  fetchAndStoreIncidents,
+  fetchAllPages,
   getIncidents,
   getIncidentsById,
 };

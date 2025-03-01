@@ -3,7 +3,7 @@ const router = express.Router();
 const policeNewsController = require('../controllers/policeNewsController');
 const pool = require('../services/mysql');
 
-router.get('/fetchAndStoreIncidents', policeNewsController.fetchAndStoreIncidents);
+router.get('/fetchAllPages', policeNewsController.fetchAllPages);
 router.get('/incidents', policeNewsController.getIncidents);
 router.get('/incidents/:id', policeNewsController.getIncidentsById);
 
@@ -18,15 +18,6 @@ router.post('/incidents/upload', async (req, res) => {
       if (!Array.isArray(jsonData)) {
         return res.status(400).json({ status: 'error', message: 'Invalid JSON format. Expected an array.' });
       }
-
-      /*
-         title VARCHAR(255),
-//   posted_date VARCHAR(50),
-  incident_number VARCHAR(50),
-  incident_date VARCHAR(50),
-  location VARCHAR(255),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
-       */
   
       const insertQuery = `
         INSERT INTO news_items (incident_number, posted_date, incident_date, location, title)
