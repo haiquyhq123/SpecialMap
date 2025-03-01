@@ -1,6 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const qs = require('qs');
+const pool = require('../services/mysql'); // MySQL connection pool
 
 // Function to fetch and parse Daily Incidents
 async function getDailyIncidents(pageNumber = 1) {
@@ -30,16 +31,18 @@ async function getDailyIncidents(pageNumber = 1) {
       '__EVENTVALIDATION': eventValidation,
       'ctl00$cphContent$hdnPage': pageNumber.toString()
     };
-    
-    // Send POST request to simulate page change
+
+    // Now send a POST request with the hidden fields
     const postResponse = await axios.post(url, qs.stringify(formData), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
-    
+
     const postHtml = postResponse.data;
     const $$ = cheerio.load(postHtml);
+
+    // Parse the items from the POST response
     return parseNewsItems($$);
   }
 }
@@ -48,16 +51,23 @@ async function getDailyIncidents(pageNumber = 1) {
 function parseNewsItems($) {
   const newsItems = [];
   const newsContainer = $('div.newsContainer');
+
   if (newsContainer.length > 0) {
     // Iterate over each news item
     newsContainer.find('div.newsItem').each((i, elem) => {
       const title = $(elem).find('h2').text().trim() || 'No Title';
       const postedDate = $(elem).find('span.newsItem_PostedDate').text().trim() || 'No Posted Date';
       const description = $(elem).find('span[id*="lblDescription"]').text().trim() || 'No Description';
-      
+
+      // Parse description to extract incidentNumber, incidentDate, location
+      const { incidentNumber, incidentDate, location } = parseDescription(description);
+
       newsItems.push({
         title,
         postedDate,
+        incidentNumber,
+        incidentDate,
+        location,
         description
       });
     });
@@ -67,6 +77,69 @@ function parseNewsItems($) {
   return newsItems;
 }
 
+/**
+ * This function extracts 'incidentNumber', 'incidentDate', and 'location' from the raw description
+ * using a simple regular expression approach. Adjust the regex if the format changes.
+ */
+function parseDescription(rawDesc) {
+  // Default values
+  let incidentNumber = '';
+  let incidentDate = '';
+  let location = '';
+
+  // Regex pattern (adapt if the actual format is different)
+  // Example format: "Incident #: WA25053113  Incident Date: Mar 1, 2025 5:47:04 AM  Location: WESTMOUNT RD E, KITCHENER, ON"
+  const pattern = /Incident #:\s*(.*?)\s*Incident Date:\s*(.*?)\s*Location:\s*(.*)/s;
+
+  const match = rawDesc.match(pattern);
+  if (match) {
+    incidentNumber = match[1].trim();
+    incidentDate = match[2].trim();
+    location = match[3].trim();
+  }
+
+  return { incidentNumber, incidentDate, location };
+}
+
+/**
+ * Retrieves incidents for the given pageNumber, then inserts them into MySQL using shared connection pool.
+ */
+async function fetchAndStoreIncidents(pageNumber) {
+  try {
+    // 1) Fetch daily incidents from the website
+    const incidents = await getDailyIncidents(pageNumber);
+    
+    // 2) Check if there are any incidents before inserting
+    if (incidents.length === 0) {
+      console.log(`Page ${pageNumber}: No data found.`);
+      return;
+    }
+
+    // 3) Insert each incident into MySQL
+    for (const item of incidents) {
+      const insertQuery = `
+        INSERT INTO news_items
+          (title, posted_date, incident_number, incident_date, location)
+        VALUES (?, ?, ?, ?, ?)
+      `;
+
+      await pool.query(insertQuery, [
+        item.title,
+        item.postedDate,
+        item.incidentNumber,
+        item.incidentDate,
+        item.location
+        // item.description
+      ]);
+    }
+
+    console.log(`Page ${pageNumber}: ${incidents.length} records inserted.`);
+  } catch (error) {
+    console.error('Error inserting data into MySQL:', error.message);
+  }
+}
+
+// Export the function for use in other modules
 module.exports = {
-  getDailyIncidents
+  fetchAndStoreIncidents
 };

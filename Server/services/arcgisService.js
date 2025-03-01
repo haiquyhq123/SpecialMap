@@ -45,7 +45,12 @@ async function fetchAndSaveData() {
 async function getSavedData() {
   try {
     const [rows] = await pool.query('SELECT feature FROM arcgis_features');
-    const features = rows.map(row => JSON.parse(row.feature));
+    // const features = rows.map(row => JSON.parse(row.feature));
+
+    const features = rows.map(row =>row.feature);
+
+    console.log("Raw feature data:", rows[0]?.feature);
+
     return {
       status: 'success',
       data: {
