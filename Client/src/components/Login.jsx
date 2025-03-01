@@ -1,36 +1,49 @@
-import React, { useState } from 'react';
-import './Login.css';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Navigate } from "react-router-dom";
 
-function Login({ onLogin, onRegister }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onLogin(username, password);
-  };
+function Login() {
+    const [redirect, setRedirect] = useState(false);
+    const {
+        register,
+        handleSubmit,
+        formState: { errors }
+    } = useForm();
 
-  return (
-    <div className="login-container">
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Username"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-        />
-        <button type="submit">Login</button>
-      </form>
-      <p>Don't have an account? <a href="#" onClick={onRegister}>Register</a></p>
-    </div>
-  );
+    const onSubmit = (data) => {
+        const userData = JSON.parse(localStorage.getItem(data.email));
+        if (userData) { // getItem can return actual value or null
+            if (userData.password === data.password) {
+                console.log('Login successful');
+                setRedirect(true);
+            } else {
+                console.log('Invalid email or password');
+            }
+        } else {
+            console.log('Invalid email or password');
+        }
+    };
+
+    if (redirect) {
+        return <Navigate to="/main" />;
+    }
+
+    return (
+        <div className="Login-Form">
+            <p className="title">Login Form</p>
+            <form className="Login-Form" onSubmit={handleSubmit(onSubmit)}>
+                <label>Email:</label>
+                <input type="email" {...register("email", { required: true })} />
+                {errors.email && <span style={{ color: "red" }}>*Email* is mandatory</span>}
+                <label>Password:</label>
+                <input type="password" {...register("password", { required: true })} />
+                {errors.password && <span style={{ color: "red" }}>*Password* is mandatory</span>}
+                <input type={"submit"} style={{ backgroundColor: "#a1eafb" }} />
+            </form>
+            <a href="./register">Not have account yet?</a>
+        </div>
+    );
 }
 
 export default Login;

@@ -39,7 +39,7 @@ function OpenMap({ location }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://10.144.112.60:3000/api/arcgis");
+        const response = await fetch("http://10.144.112.60:3000/api/arcgis/saved");
         if (!response.ok) {
           throw new Error(`Server Error: ${response.status}`);
         }
