@@ -160,8 +160,8 @@ async function fetchAndStoreIncidents(pageNumber) {
     for (const item of incidents) {
       const insertQuery = `
         INSERT INTO news_items
-          (title, posted_date, incident_number, incident_date, location)
-        VALUES (?, ?, ?, ?, ?)
+          (title, posted_date, incident_number, incident_date, location, receivedFrom)
+        VALUES (?, ?, ?, ?, ?, ?)
       `;
 
       await pool.query(insertQuery, [
@@ -169,7 +169,8 @@ async function fetchAndStoreIncidents(pageNumber) {
         item.postedDate,
         item.incidentNumber,
         item.incidentDate,
-        item.location
+        item.location,
+        0
       ]);
     }
 
@@ -232,8 +233,8 @@ async function uploadIncident(req) {
 
     const insertQuery = `
       INSERT INTO news_items
-        (title, posted_date, incident_number, incident_date, location)
-      VALUES (?, ?, ?, ?, ?)
+        (title, posted_date, incident_number, incident_date, location, receivedFrom)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     await pool.query(insertQuery, [
@@ -241,7 +242,8 @@ async function uploadIncident(req) {
       req.body.posted_date,
       req.body.incident_number,
       req.body.incident_date,
-      req.body.location
+      req.body.location,
+      1
     ]);
   } catch (error) {
     console.error(` Error inserting data from page ${pageNumber}:`, error.message);
