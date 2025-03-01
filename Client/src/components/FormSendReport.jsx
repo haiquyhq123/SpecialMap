@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 function FormSendReport() {
   const [title, setTitle] = useState('');
   const [postedDate, setPostedDate] = useState('');
-  const [incidentNumber, setIncidentNumber] = useState('');
+  const [incidentDescription, setIncidentDescription] = useState('');
   const [incidentDate, setIncidentDate] = useState('');
   const [location, setLocation] = useState('');
 
@@ -13,13 +13,13 @@ function FormSendReport() {
     const incidentReport = {
       title,
       posted_date: postedDate,
-      incident_number: incidentNumber,
+      incident_description: incidentDescription,
       incident_date: incidentDate,
       location
     };
 
     try {
-      const response = await fetch('http://localhost:3000/api/incidents/upload', {
+      const response = await fetch('http://http://10.144.112.60/api/incidents/upload', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -37,7 +37,7 @@ function FormSendReport() {
       // Clear form fields
       setTitle('');
       setPostedDate('');
-      setIncidentNumber('');
+      setIncidentDescription('');
       setIncidentDate('');
       setLocation('');
     } catch (error) {
@@ -71,8 +71,8 @@ function FormSendReport() {
           Incident Number:
           <input
             type="text"
-            value={incidentNumber}
-            onChange={(e) => setIncidentNumber(e.target.value)}
+            value={incidentDescription}
+            onChange={(e) => setIncidentDescription(e.target.value)}
             required
           />
         </label>
