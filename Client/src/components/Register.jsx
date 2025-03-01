@@ -4,17 +4,44 @@ import { useForm } from "react-hook-form";
 function Register() {
     const { register, handleSubmit, formState: { errors } } = useForm();
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         if (data.password !== data.retypePassword) {
             console.log("Passwords do not match");
             return;
         }
+
+        // Save to local storage
         localStorage.setItem(data.email, JSON.stringify({ 
             name: data.name, 
             phone: data.phone, 
             password: data.password 
         }));
         console.log(JSON.parse(localStorage.getItem(data.email)));
+
+        // Send data to backend
+        try {
+            const response = await fetch('http://10.144.112.60:3000/api/user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: data.name,
+                    email: data.email,
+                    phone: data.phone,
+                    password: data.password
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to register');
+            }
+
+            const result = await response.json();
+            console.log('Registration successful:', result);
+        } catch (error) {
+            console.error('Error registering user:', error);
+        }
     };
 
     return (
