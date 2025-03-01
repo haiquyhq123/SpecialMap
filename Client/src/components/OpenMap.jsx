@@ -25,8 +25,12 @@ function OpenMap({ location }) {
         if (!response.ok) {
           throw new Error(`Server Error: ${response.status}`);
         }
-        const data = await response.json();
-        setRoadData(data.features || []);
+        const result = await response.json();
+        if (result.status === "success" && result.data && Array.isArray(result.data.features)) {
+          setRoadData(result.data.features);
+        } else {
+          throw new Error("Invalid API response format");
+        }
       } catch (error) {
         console.error("Error fetching road closure data:", error);
         setError(error.message);
