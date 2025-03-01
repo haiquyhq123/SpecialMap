@@ -1,54 +1,22 @@
 import React, { useState } from 'react';
-import OpenMap from './components/OpenMap';
-import SearchingInformationPanel from './components/SearchingInformationPanel';
-import Login from './components/Login';
-import Register from './components/Register';
+import ReactDOM from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from './Pages/Home';
+import RegisterFeature from './components/RegisterFeature';
+import MainPage from './Pages/MainPage';
 import './App.css';
 
 function App() {
-  const [location, setLocation] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [userData, setUserData] = useState(null);
+  return(
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home/>} />
+        <Route path="/register" element={<RegisterFeature></RegisterFeature>} />
+        <Route path = "/main" element={<MainPage></MainPage>} />
 
-  const handleSearch = (newLocation) => {
-    setLocation(newLocation);
-  };
-
-  const handleLogin = (username, password) => {
-    // Verify login credentials
-    if (userData && userData.username === username && userData.password === password) {
-      setIsLoggedIn(true);
-    } else {
-      alert('Invalid credentials');
-    }
-  };
-
-  const handleRegister = (data) => {
-    setUserData(data);
-    setIsRegistering(false);
-    setIsLoggedIn(true);
-  };
-
-  return (
-    <div className="main-container">
-      {!isLoggedIn ? (
-        isRegistering ? (
-          <Register onRegister={handleRegister} onBackToLogin={() => setIsRegistering(false)} />
-        ) : (
-          <Login onLogin={handleLogin} onRegister={() => setIsRegistering(true)} />
-        )
-      ) : (
-        <div className="content">
-          <button className="incident-report-button">Send Incident Report</button>
-          <div className="panels">
-            <SearchingInformationPanel onSearch={handleSearch} />
-            <OpenMap location={location} />
-          </div>
-        </div>
-      )}
-    </div>
-  );
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
 export default App;
