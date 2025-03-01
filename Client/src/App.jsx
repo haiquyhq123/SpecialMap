@@ -34,7 +34,7 @@ function App() {
     <div className="main-container">
       {!isLoggedIn ? (
         isRegistering ? (
-          <Register onRegister={handleRegister} />
+          <Register onRegister={handleRegister} onBackToLogin={() => setIsRegistering(false)} />
         ) : (
           <Login onLogin={handleLogin} onRegister={() => setIsRegistering(true)} />
         )
