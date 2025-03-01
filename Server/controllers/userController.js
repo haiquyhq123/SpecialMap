@@ -12,7 +12,7 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   try {
     const data = await userService.loginUser(req);
-    if (res.status == "success") {
+    if (data.status == "success") {
         res.status(200).json(data);
     } else {
         res.status(400).json(data);
