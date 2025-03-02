@@ -6,8 +6,6 @@ async function registerUser(req) {
   try {
     const userInfo = req.body;
 
-    console.log(`Debug: UserInfo ${JSON.stringify(userInfo)}`);
-
     const insertQuery = `
       INSERT INTO users
         (name, email, phone, password)
@@ -34,8 +32,6 @@ async function registerUser(req) {
 async function loginUser(req) {
   try {
     const { email, password} = req.query;
-
-    console.log(`Debug: email ${email} / passwd ${password}`);
 
     const selectQuery = `
       SELECT * FROM users

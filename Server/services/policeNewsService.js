@@ -1,15 +1,13 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const pool = require('../services/mysql'); // MySQL connection pool
-
-const api_key = 'ge-20f850ce081d1822';
+const config = require('../config/config');
 
 async function fetchAllIncidents() {
-  const baseUrl = 'https://www.wrps.on.ca/Modules/NewsIncidents/search.aspx?feedId=73a5e2dc-45fb-425f-96b9-d575355f7d4d';
 
   try {
     // Fetch the first page to get totalIncidents count
-    const response = await axios.get(baseUrl);
+    const response = await axios.get(config.incidentAPI);
     const html = response.data;
     const $ = cheerio.load(html);
 
@@ -48,7 +46,7 @@ async function fetchAllIncidents() {
  */
 async function getDailyIncidents(pageNumber) {
   //  Append the page number to the URL for pagination
-  const url = `https://www.wrps.on.ca/Modules/NewsIncidents/search.aspx?feedId=73a5e2dc-45fb-425f-96b9-d575355f7d4d&page=${pageNumber}`;
+  const url = `${config.incidentAPI}&page=${pageNumber}`;
 
   try {
     const response = await axios.get(url);
@@ -72,8 +70,7 @@ async function getTotalPages() {
   try {
     console.log(" Detecting the total number of pages...");
 
-    const url = 'https://www.wrps.on.ca/Modules/NewsIncidents/search.aspx?feedId=73a5e2dc-45fb-425f-96b9-d575355f7d4d';
-    const response = await axios.get(url);
+    const response = await axios.get(config.incidentAPI);
     const html = response.data;
     const $ = cheerio.load(html);
 
@@ -262,10 +259,9 @@ async function uploadIncident(req) {
 async function getCoordinates(address) {
   try {
     let convertAddress = address.split(',')[0]+ ' ON';
-    const query = 'https://api.geocode.earth/v1/search?' +
-    `api_key=${api_key}&` +
+    const query = `${config.geoCodeAPI}` +
+    `api_key=${config.geoCodeApiKey}&` +
     `text=${convertAddress}`.replace(' ', '+');
-        // const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
         const response = await axios.get(query);
     
     if (response.data.features.length > 0) {

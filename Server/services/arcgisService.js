@@ -1,17 +1,14 @@
 const axios = require('axios');
 const pool = require('../services/mysql'); // MySQL connection pool
+const config = require('../config/config');
 
 // Fetch data from external ArcGIS APIs, save to MySQL, and return combined GeoJSON
 async function fetchAndSaveData() {
   try {
-    // Define both external API URLs
-    const currentApi = 'https://utility.arcgis.com/usrsvcs/servers/fe45821bc236443d84b5fc3698f583bf/rest/services/OpenData/OpenData/MapServer/24/query?outFields=*&where=1%3D1&f=geojson';
-    const futureApi = 'https://utility.arcgis.com/usrsvcs/servers/737980ba63a34f9ca0cb8e1b5cea6c6d/rest/services/OpenData/OpenData/MapServer/25/query?outFields=*&where=1%3D1&f=geojson';
-    
     // Make both API calls concurrently
     const [currentRes, futureRes] = await Promise.all([
-      axios.get(currentApi),
-      axios.get(futureApi)
+      axios.get(config.currentConstructionAPI),
+      axios.get(config.futureConstructionAPI)
     ]);
     
     // Extract the GeoJSON data from each response

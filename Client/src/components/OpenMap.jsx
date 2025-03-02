@@ -27,7 +27,7 @@ const accidentIcon = new L.Icon({
 });
 
 
-function OpenMap({ location }) {
+function OpenMap() {
   const [coordinates] = useState([43.4643, -80.5204]); // Default: Waterloo, Ontario, Canada
   const [roadData, setRoadData] = useState([]); // Store API response (list of features)
   const [accidentData, setAccidentData] = useState([]); // Accidents
@@ -99,68 +99,12 @@ function OpenMap({ location }) {
 
   return (
     <div className="map-container">
-      <div className="toggles" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-        {/* Current Construction */}
-        <label style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f9f9f9', borderRadius: '6px', padding: '0.5rem' }}>
-          <img 
-            src="./src/images/existing_construction.png" 
-            alt="Current Construction Icon" 
-            style={{ width: '20px', height: '20px', marginRight: '5px' }} 
-          />
-          <input 
-            type="checkbox" 
-            checked={showCurrentConstruction} 
-            onChange={() => setShowCurrentConstruction(!showCurrentConstruction)} 
-            style={{ marginRight: '5px' }}
-          />
-          Current Construction
-        </label>
-
-        {/* Future Construction */}
-        <label style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f9f9f9', borderRadius: '6px', padding: '0.5rem' }}>
-          <img 
-            src="./src/images/future_construction.png" 
-            alt="Future Construction Icon" 
-            style={{ width: '20px', height: '20px', marginRight: '5px' }} 
-          />
-          <input 
-            type="checkbox" 
-            checked={showFutureConstruction} 
-            onChange={() => setShowFutureConstruction(!showFutureConstruction)} 
-            style={{ marginRight: '5px' }}
-          />
-          Future Construction
-        </label>
-
-        {/* Incidents */}
-        <label style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f9f9f9', borderRadius: '6px', padding: '0.5rem' }}>
-          <img 
-            src="./src/images/siren.png" 
-            alt="Incident Icon" 
-            style={{ width: '20px', height: '20px', marginRight: '5px' }} 
-          />
-          <input 
-            type="checkbox" 
-            checked={showIncidents} 
-            onChange={() => setShowIncidents(!showIncidents)} 
-            style={{ marginRight: '5px' }}
-          />
-          Incidents
-        </label>
-      </div>
 
       <MapContainer center={coordinates} zoom={12} style={{ height: "100%", width: "100%" }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-
-        {/* 📍 Default Location Marker */}
-        <Marker position={coordinates}>
-          <Popup>
-            {location.charAt(0).toUpperCase() + location.slice(1)}. <br /> This is Waterloo,
-          </Popup>
-        </Marker>
 
         {/* 🚧 Render multiple road closures */}
         {roadData.map((feature) => {
@@ -243,6 +187,55 @@ function OpenMap({ location }) {
         )}
 
       </MapContainer>
+      <div className="toggles" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', marginTop: '10px' }}>
+        {/* Current Construction */}
+        <label style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f9f9f9', borderRadius: '6px', padding: '0.5rem' }}>
+          <img 
+            src="./src/images/existing_construction.png" 
+            alt="Current Construction Icon" 
+            style={{ width: '30px', height: '30px', marginRight: '5px' }} 
+          />
+          <input 
+            type="checkbox" 
+            checked={showCurrentConstruction} 
+            onChange={() => setShowCurrentConstruction(!showCurrentConstruction)} 
+            style={{ marginRight: '5px' }}
+          />
+          Current Construction
+        </label>
+
+        {/* Future Construction */}
+        <label style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f9f9f9', borderRadius: '6px', padding: '0.5rem' }}>
+          <img 
+            src="./src/images/future_construction.png" 
+            alt="Future Construction Icon" 
+            style={{ width: '30px', height: '30px', marginRight: '5px' }} 
+          />
+          <input 
+            type="checkbox" 
+            checked={showFutureConstruction} 
+            onChange={() => setShowFutureConstruction(!showFutureConstruction)} 
+            style={{ marginRight: '5px' }}
+          />
+          Future Construction
+        </label>
+
+        {/* Incidents */}
+        <label style={{ display: 'flex', alignItems: 'center', backgroundColor: '#f9f9f9', borderRadius: '6px', padding: '0.5rem' }}>
+          <img 
+            src="./src/images/siren.png" 
+            alt="Incident Icon" 
+            style={{ width: '30px', height: '30px', marginRight: '5px' }} 
+          />
+          <input 
+            type="checkbox" 
+            checked={showIncidents} 
+            onChange={() => setShowIncidents(!showIncidents)} 
+            style={{ marginRight: '5px' }}
+          />
+          Incidents
+        </label>
+      </div>
     </div>
   );
 }
