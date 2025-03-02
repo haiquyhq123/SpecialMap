@@ -198,6 +198,7 @@ async function fetchAllPages() {
     for (let page = 1; page <= totalPages; page++) {
       console.log(` Fetching data from page ${page}...`);
       await fetchAndStoreIncidents(page);
+      break;
     }
 
     console.log(' Successfully processed all pages.');
@@ -211,7 +212,7 @@ async function fetchAllPages() {
  */
 async function getIncidents() {
   try {
-    const [rows] = await pool.query('SELECT title, posted_date, incident_number, incident_date, location, latitude, longitude, created_at FROM news_items ORDER BY incident_date DESC');
+    const [rows] = await pool.query('SELECT title, posted_date, incident_number, incident_description, incident_date, location, latitude, longitude, created_at FROM news_items ORDER BY incident_date DESC');
     return rows;
   } catch (error) {
     console.error(' Error fetching data:', error.message);
@@ -241,14 +242,14 @@ async function uploadIncident(req) {
 
     const insertQuery = `
       INSERT INTO news_items
-        (title, posted_date, incident_number, incident_date, location, receivedFrom)
+        (title, posted_date, incident_description, incident_date, location, receivedFrom)
       VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     await pool.query(insertQuery, [
       req.body.title,
       req.body.posted_date,
-      req.body.incident_number,
+      req.body.incident_description,
       req.body.incident_date,
       req.body.location,
       1
@@ -260,12 +261,12 @@ async function uploadIncident(req) {
 
 async function getCoordinates(address) {
   try {
-let convertAddress = address.split(',')[0];
-const query = 'https://api.geocode.earth/v1/search?' +
-`api_key=${api_key}&` +
-`text=${convertAddress}`.replace(' ', '+');
-    // const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
-    const response = await axios.get(query);
+    let convertAddress = address.split(',')[0]+ ' ON';
+    const query = 'https://api.geocode.earth/v1/search?' +
+    `api_key=${api_key}&` +
+    `text=${convertAddress}`.replace(' ', '+');
+        // const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+        const response = await axios.get(query);
     
     if (response.data.features.length > 0) {
       return {
