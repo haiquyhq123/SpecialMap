@@ -209,7 +209,7 @@ async function fetchAllPages() {
  */
 async function getIncidents() {
   try {
-    const [rows] = await pool.query('SELECT title, posted_date, incident_number, incident_description, incident_date, location, latitude, longitude, created_at FROM news_items ORDER BY incident_date DESC');
+    const [rows] = await pool.query('SELECT title, posted_date, incident_number, incident_description, incident_date, location, latitude, longitude, receivedFrom, created_at FROM news_items ORDER BY incident_date DESC');
     return rows;
   } catch (error) {
     console.error(' Error fetching data:', error.message);

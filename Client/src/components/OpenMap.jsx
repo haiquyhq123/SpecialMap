@@ -26,6 +26,13 @@ const accidentIcon = new L.Icon({
   popupAnchor: [0, -30]
 });
 
+const accidentIconUser = new L.Icon({
+  iconUrl: "./src/images/sirenUser.png", // Car accident icon
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+  popupAnchor: [0, -30]
+});
+
 
 function OpenMap() {
   const [coordinates] = useState([43.4643, -80.5204]); // Default: Waterloo, Ontario, Canada
@@ -79,7 +86,6 @@ function OpenMap() {
             latitude: incident.latitude ? parseFloat(incident.latitude) : 43.4643, // Default to Waterloo
             longitude: incident.longitude ? parseFloat(incident.longitude) : -80.5204
           }));
-    
           setAccidentData(processedIncidents);
         } else {
           throw new Error("Invalid API response format");
@@ -164,17 +170,14 @@ function OpenMap() {
 
         {/* 🚨 Render Accident Markers */}
         {showIncidents && (
-          accidentData
-            .filter(incident => 
-              incident.latitude && incident.longitude && 
-              !isNaN(parseFloat(incident.latitude)) && 
-              !isNaN(parseFloat(incident.longitude))
+          accidentData.filter(
+            incident => (incident.latitude && incident.longitude && !isNaN(parseFloat(incident.latitude)) && !isNaN(parseFloat(incident.longitude)) && incident.receivedFrom)
             )
             .map((incident, index) => (
               <Marker 
                 key={`accident-${index}`} 
-                position={[parseFloat(incident.latitude), parseFloat(incident.longitude)]} 
-                icon={accidentIcon}
+                position={[parseFloat(incident.latitude), parseFloat(incident.longitude)]}             
+                icon={ incident.receivedFrom == '1' ? accidentIconUser : accidentIcon }
               >
                 <Popup>
                   🚨 <b>{incident.title}</b> <br />
