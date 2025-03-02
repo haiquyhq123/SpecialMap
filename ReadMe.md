@@ -1,3 +1,6 @@
+
+### Infra structure
+![[Pasted image 20250301232047.png]]
 ##### API
 #### `Incident Informations`
 ##### <span style="background-color:#33FF33; color:#000000"> GET  </span> /api/police-news/incidents

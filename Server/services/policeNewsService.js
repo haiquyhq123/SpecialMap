@@ -237,10 +237,12 @@ async function uploadIncident(req) {
   try {
     const incident = req.body;
 
+    const { latitude, longitude } = await getCoordinates(incident.location);
+
     const insertQuery = `
       INSERT INTO news_items
-        (title, posted_date, incident_description, incident_date, location, receivedFrom)
-      VALUES (?, ?, ?, ?, ?, ?)
+        (title, posted_date, incident_description, incident_date, location, latitude, longitude, receivedFrom)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     await pool.query(insertQuery, [
@@ -249,6 +251,8 @@ async function uploadIncident(req) {
       req.body.incident_description,
       req.body.incident_date,
       req.body.location,
+      latitude, 
+      longitude,
       1
     ]);
   } catch (error) {

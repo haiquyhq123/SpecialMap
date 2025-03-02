@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 
-function FormSendReport() {
+function FormSendReport({ onSuccess }) {
   const [title, setTitle] = useState('');
-  const [postedDate, setPostedDate] = useState(() => {
-    // Calculated only once when component is initialized
-    return new Date().toISOString().split('T')[0];
-  });
+  const [postedDate, setPostedDate] = useState(() =>
+    new Date().toISOString().split('T')[0]
+  );
   const [incidentDescription, setIncidentDescription] = useState('');
   const [incidentDate, setIncidentDate] = useState('');
   const [location, setLocation] = useState('');
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,7 +21,7 @@ function FormSendReport() {
     };
 
     try {
-      const response = await fetch('http://10.144.112.60/api/incidents/upload', {
+      const response = await fetch('http://10.144.112.60:3000/api/police-news/incidents/upload', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -40,10 +38,11 @@ function FormSendReport() {
 
       // Clear form fields
       setTitle('');
-      setPostedDate('');
+      setPostedDate(new Date().toISOString().split('T')[0]);
       setIncidentDescription('');
       setIncidentDate('');
       setLocation('');
+      onSuccess(location); 
     } catch (error) {
       console.error('Error submitting incident report:', error);
     }
@@ -53,9 +52,9 @@ function FormSendReport() {
     <div className="form-send-report" style={{ marginBottom: '30px' }}>
       <h2>Submit Incident Report</h2>
       <form onSubmit={handleSubmit}>
-        <table style={{width: '800px', }}>
+          <table style={{ width: '800px' }}>
         <tbody>
-            <tr style={{width: '800px', }}>
+              <tr style={{ width: '800px' }}>
               <td>
                 <label>
                   Title:
