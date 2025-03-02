@@ -193,7 +193,7 @@ function OpenMap() {
           <img 
             src="./src/images/existing_construction.png" 
             alt="Current Construction Icon" 
-            style={{ width: '20px', height: '20px', marginRight: '5px' }} 
+            style={{ width: '30px', height: '30px', marginRight: '5px' }} 
           />
           <input 
             type="checkbox" 
@@ -209,7 +209,7 @@ function OpenMap() {
           <img 
             src="./src/images/future_construction.png" 
             alt="Future Construction Icon" 
-            style={{ width: '20px', height: '20px', marginRight: '5px' }} 
+            style={{ width: '30px', height: '30px', marginRight: '5px' }} 
           />
           <input 
             type="checkbox" 
@@ -225,7 +225,7 @@ function OpenMap() {
           <img 
             src="./src/images/siren.png" 
             alt="Incident Icon" 
-            style={{ width: '20px', height: '20px', marginRight: '5px' }} 
+            style={{ width: '30px', height: '30px', marginRight: '5px' }} 
           />
           <input 
             type="checkbox" 

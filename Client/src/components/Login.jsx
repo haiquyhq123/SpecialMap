@@ -17,7 +17,9 @@ function Login() {
                 throw new Error('Network response was not ok');
             }
             const userData = await response.json();
-            if (userData && userData.password === data.password) {
+            console.log(userData);
+            console.log(JSON.stringify(userData));
+            if (userData && userData.status === "success") {
                 console.log('Login successful');
                 setRedirect(true);
             } else {

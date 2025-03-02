@@ -54,57 +54,70 @@ function FormSendReport() {
       <h2>Submit Incident Report</h2>
       <form onSubmit={handleSubmit}>
         <table style={{width: '800px', }}>
-          <tr style={{width: '800px', }}>
-          <label>
-            Title:
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            Incident Description
-            <input
-              type="text"
-              value={incidentDescription}
-              onChange={(e) => setIncidentDescription(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            Posted Date:
-            <input 
-              type="date" 
-              name="postedDate" 
-              value={postedDate} 
-              onChange={(e) => setPostedDate(e.target.value)} 
-            />
-          </label>
-          </tr>
-          <tr>
-          <label>
-            Location:
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            Incident Date:
-            <input
-              type="date"
-              value={incidentDate}
-              onChange={(e) => setIncidentDate(e.target.value)}
-              required
-            />
-          </label>
-
-          <button type="submit">Submit</button>
-          </tr>
+        <tbody>
+            <tr style={{width: '800px', }}>
+              <td>
+                <label>
+                  Title:
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                  />
+                </label>
+              </td>
+              <td>
+              <label>
+                  Incident Description
+                  <input
+                    type="text"
+                    value={incidentDescription}
+                    onChange={(e) => setIncidentDescription(e.target.value)}
+                    required
+                  />
+                </label>
+              </td>
+              <td>
+                <label>
+                  Posted Date:
+                  <input 
+                    type="date" 
+                    name="postedDate" 
+                    value={postedDate} 
+                    onChange={(e) => setPostedDate(e.target.value)} 
+                  />
+                </label>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label>
+                  Location:
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    required
+                  />
+                </label>
+              </td>
+            <td>
+              <label>
+                Incident Date:
+                <input
+                  type="date"
+                  value={incidentDate}
+                  onChange={(e) => setIncidentDate(e.target.value)}
+                  required
+                />
+              </label>
+            </td>
+            <td>
+              <button type="submit">Submit</button>
+            </td>
+            </tr>
+          </tbody>
         </table>
       </form>
     </div>
