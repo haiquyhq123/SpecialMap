@@ -33,3 +33,9 @@ The anonymous incident report is a **key function** of SpecialMap that allows fo
 
 Above is a Link to a figma wireframe design for SpecialMap that is not integrated with code.
 The provided wireframe is a proof of concept and a next step design to improve UI and UX.
+
+
+### <ins>[InstallationGuide](https://github.com/haiquyhq123/SpecialMap/blob/main/InstallationGuide.md).</ins>
+
+Above is a link that explains how to set up the project and use it.
+
