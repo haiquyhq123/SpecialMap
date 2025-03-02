@@ -1,4 +1,21 @@
+### How to install and use
 
+```
+git clone https://github.com/haiquyhq123/SpecialMap.git
+cd SpecialMap
+
+# Client
+cd Client
+npm install
+npm run dev
+
+http://localhost:5173/
+
+#Server
+cd Server
+npm install
+npm run dev
+```
 ### Infra structure
 ![image](https://github.com/user-attachments/assets/cd36ab45-9f35-4584-9b92-96c8ae1f20db)
 
