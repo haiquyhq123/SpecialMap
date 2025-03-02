@@ -19,7 +19,7 @@ function FormSendReport() {
     };
 
     try {
-      const response = await fetch('http://http://10.144.112.60/api/incidents/upload', {
+      const response = await fetch('http://10.144.112.60/api/incidents/upload', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -46,7 +46,7 @@ function FormSendReport() {
   };
 
   return (
-    <div className="form-send-report">
+    <div className="form-send-report" style={{ marginBottom: '30px' }}>
       <h2>Submit Incident Report</h2>
       <form onSubmit={handleSubmit}>
         <label>
