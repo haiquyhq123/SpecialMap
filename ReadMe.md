@@ -1,6 +1,6 @@
 
 ### Infra structure
-![image](https://github.com/user-attachments/assets/af41e2b0-1aea-4770-ad7b-16e8cdfb5f4d)
+![image](https://github.com/user-attachments/assets/119a64b2-49cf-4cf7-9e4a-a47985f08d6e)
 
 ##### API
 #### `Incident Informations`
